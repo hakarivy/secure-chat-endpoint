@@ -7,7 +7,7 @@ const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 // Initialize Gemini Client
-// It automatically reads GEMINI_API_KEY from environment variables
+// It automatically reads Gemini_API_KEY from environment variables
 const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_KEY });
 
 app.use(helmet());
@@ -23,7 +23,7 @@ const chatLimiter = rateLimit({
 // Secret API Authentication
 const authenticateRequest = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const secretKey = process.env.GEMINI_API_SECRET || 'fallback-secret-key';
+  const secretKey = process.env.Gemini_API_SECRET || 'fallback-secret-key';
 
   if (!authHeader || authHeader !== `Bearer ${secretKey}`) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
@@ -42,7 +42,7 @@ app.post('/api/v1/chat', chatLimiter, authenticateRequest, async (req, res) => {
   try {
     // Generate AI response using Gemini 2.5 Flash
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'Gemini-2.5-flash',
       contents: message,
     });
 
