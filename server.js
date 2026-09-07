@@ -38,7 +38,7 @@ app.post('/api/v1/chat', chatLimiter, authenticateRequest, async (req, res) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash-lite',
       contents: message,
     });
 
