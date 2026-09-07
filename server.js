@@ -22,7 +22,7 @@ const chatLimiter = rateLimit({
 // Secret API Authentication
 const authenticateRequest = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const secretKey = process.env.CHAT_API_SECRET || 'fallback-secret-key';
+  const secretKey = process.env.VECSAR_API_SECRET || 'fallback-secret-key';
 
   if (!authHeader || authHeader !== `Bearer ${secretKey}`) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
