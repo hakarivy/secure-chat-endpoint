@@ -3,27 +3,25 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { GoogleGenAI } = require('@google/genai');
 
-
 const app = express();
 
-// Initialize Gemini Client
-// It automatically reads Gemini_API_KEY from environment variables
-const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_KEY });
+// Pass GEMINI_API_KEY explicitly to the SDK constructor
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 
-// Rate Limiting (30 requests per minute per IP)
+// Rate Limiter
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 30,
   message: { error: 'Too many requests, please try again later.' }
 });
 
-// Secret API Authentication
+// Authentication Middleware checking against CHAT_API_SECRET
 const authenticateRequest = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const secretKey = process.env.Gemini_API_SECRET || 'fallback-secret-key';
+  const secretKey = process.env.CHAT_API_SECRET || 'fallback-secret-key';
 
   if (!authHeader || authHeader !== `Bearer ${secretKey}`) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
@@ -31,7 +29,6 @@ const authenticateRequest = (req, res, next) => {
   next();
 };
 
-// Secure Chat Endpoint integrated with Gemini
 app.post('/api/v1/chat', chatLimiter, authenticateRequest, async (req, res) => {
   const { message } = req.body;
 
@@ -40,9 +37,8 @@ app.post('/api/v1/chat', chatLimiter, authenticateRequest, async (req, res) => {
   }
 
   try {
-    // Generate AI response using Gemini 2.5 Flash
     const response = await ai.models.generateContent({
-      model: 'Gemini-2.5-flash',
+      model: 'gemini-2.5-flash',
       contents: message,
     });
 
