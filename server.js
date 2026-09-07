@@ -1,10 +1,14 @@
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// Security Headers & Payload Size Limits
+// Initialize Gemini Client
+// It automatically reads GEMINI_API_KEY from environment variables
+const ai = new GoogleGenAI();
+
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 
@@ -26,20 +30,31 @@ const authenticateRequest = (req, res, next) => {
   next();
 };
 
-// Secure POST Endpoint
-app.post('/api/v1/chat', chatLimiter, authenticateRequest, (req, res) => {
+// Secure Chat Endpoint integrated with Gemini
+app.post('/api/v1/chat', chatLimiter, authenticateRequest, async (req, res) => {
   const { message } = req.body;
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'Message field is required and must be a string' });
   }
 
-  // Insert AI service/LLM API call here in the future
-  return res.json({
-    status: 'success',
-    reply: `Cloud server received: "${message}"`,
-    timestamp: new Date().toISOString()
-  });
+  try {
+    // Generate AI response using Gemini 2.5 Flash
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: message,
+    });
+
+    return res.json({
+      status: 'success',
+      reply: response.text,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    return res.status(500).json({ error: 'Failed to generate response from AI service.' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
