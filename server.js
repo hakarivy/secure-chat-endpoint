@@ -8,7 +8,7 @@ const app = express();
 
 // Initialize Gemini Client
 // It automatically reads GEMINI_API_KEY from environment variables
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_KEY });
 
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
